@@ -1,111 +1,157 @@
+@import "tailwindcss";
+@import "shadcn/tailwind.css";
+@import "tw-animate-css";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/space-grotesk";
+
+@custom-variant dark (&:is(.dark *));
+
 :root {
-  --text: #6b6375;
-  --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
-  --code-bg: #f4f3ec;
-  --accent: #aa3bff;
-  --accent-bg: rgba(170, 59, 255, 0.1);
-  --accent-border: rgba(170, 59, 255, 0.5);
-  --social-bg: rgba(244, 243, 236, 0.5);
-  --shadow:
-    rgba(0, 0, 0, 0.1) 0 10px 15px -3px, rgba(0, 0, 0, 0.05) 0 4px 6px -2px;
+  /* Bento-box / food-diary palette */
+  --paper: #fafaf7;
+  --ink: #1a1a17;
+  --soy: #6b6b65;
+  --miso: #e8a838;
+  --miso-light: #f8edd5;
+  --nori: #2a4b3a;
+  --nori-light: #e6efea;
+  --shiso: #f25c54;
+  --shiso-light: #fde8e7;
+  --dashi: #e8e5df;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --heading: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --mono: ui-monospace, Consolas, monospace;
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: #ffffff;
+  --card-foreground: var(--ink);
+  --popover: #ffffff;
+  --popover-foreground: var(--ink);
+  --primary: var(--miso);
+  --primary-foreground: var(--ink);
+  --secondary: var(--nori-light);
+  --secondary-foreground: var(--nori);
+  --muted: #f3f2ed;
+  --muted-foreground: var(--soy);
+  --accent: var(--shiso);
+  --accent-foreground: #ffffff;
+  --destructive: var(--shiso);
+  --border: var(--dashi);
+  --input: var(--dashi);
+  --ring: var(--miso);
+  --radius: 1.25rem;
 
-  font: 18px/145% var(--sans);
-  letter-spacing: 0.18px;
-  color-scheme: light dark;
-  color: var(--text);
-  background: var(--bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --font-display: 'Space Grotesk Variable', 'Geist Variable', system-ui, sans-serif;
+  --font-sans: 'Geist Variable', 'PingFang TC', 'Hiragino Sans TC', 'Microsoft JhengHei', system-ui, sans-serif;
 
-  @media (max-width: 1024px) {
-    font-size: 16px;
+  --shadow-sm: 0 1px 2px rgba(26, 26, 23, 0.04);
+  --shadow: 0 4px 12px rgba(26, 26, 23, 0.06);
+  --shadow-lg: 0 12px 32px rgba(26, 26, 23, 0.1);
+}
+
+.dark {
+  --paper: #1a1a17;
+  --ink: #fafaf7;
+  --soy: #a8a59d;
+  --miso: #d4a23b;
+  --miso-light: #3a2e15;
+  --nori: #6b9b84;
+  --nori-light: #1f2e26;
+  --shiso: #e86a5d;
+  --shiso-light: #3a1e1a;
+  --dashi: rgba(255, 255, 255, 0.1);
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: #24241f;
+  --card-foreground: var(--ink);
+  --popover: #24241f;
+  --popover-foreground: var(--ink);
+  --primary: var(--miso);
+  --primary-foreground: #1a150b;
+  --secondary: var(--nori-light);
+  --secondary-foreground: var(--nori);
+  --muted: #262622;
+  --muted-foreground: var(--soy);
+  --accent: var(--shiso);
+  --accent-foreground: #1a0b09;
+  --destructive: var(--shiso);
+  --border: var(--dashi);
+  --input: var(--dashi);
+  --ring: var(--miso);
+}
+
+@theme inline {
+  --font-display: var(--font-display);
+  --font-sans: var(--font-sans);
+  --font-heading: var(--font-display);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-shiso: var(--shiso);
+  --color-shiso-light: var(--shiso-light);
+  --color-nori: var(--nori);
+  --color-nori-light: var(--nori-light);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) * 0.4);
+  --radius-md: calc(var(--radius) * 0.7);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.3);
+  --radius-2xl: calc(var(--radius) * 1.7);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.7);
+}
+
+@keyframes bento-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #9ca3af;
-    --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
-    --code-bg: #1f2028;
-    --accent: #c084fc;
-    --accent-bg: rgba(192, 132, 252, 0.15);
-    --accent-border: rgba(192, 132, 252, 0.5);
-    --social-bg: rgba(47, 48, 58, 0.5);
-    --shadow:
-      rgba(0, 0, 0, 0.4) 0 10px 15px -3px, rgba(0, 0, 0, 0.25) 0 4px 6px -2px;
-  }
+.animate-bento-in {
+  animation: bento-in 0.45s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
 
-  #social .button-icon {
-    filter: invert(1) brightness(2);
+@media (prefers-reduced-motion: reduce) {
+  .animate-bento-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
   }
 }
 
-#root {
-  width: 1126px;
-  max-width: 100%;
-  margin: 0 auto;
-  text-align: center;
-  border-inline: 1px solid var(--border);
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-}
-
-h1,
-h2 {
-  font-family: var(--heading);
-  font-weight: 500;
-  color: var(--text-h);
-}
-
-h1 {
-  font-size: 56px;
-  letter-spacing: -1.68px;
-  margin: 32px 0;
-  @media (max-width: 1024px) {
-    font-size: 36px;
-    margin: 20px 0;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-}
-h2 {
-  font-size: 24px;
-  line-height: 118%;
-  letter-spacing: -0.24px;
-  margin: 0 0 8px;
-  @media (max-width: 1024px) {
-    font-size: 20px;
+  html,
+  body,
+  #root {
+    @apply min-h-svh;
   }
-}
-p {
-  margin: 0;
-}
-
-code,
-.counter {
-  font-family: var(--mono);
-  display: inline-flex;
-  border-radius: 4px;
-  color: var(--text-h);
-}
-
-code {
-  font-size: 15px;
-  line-height: 135%;
-  padding: 4px 8px;
-  background: var(--code-bg);
+  body {
+    @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  html {
+    @apply font-sans;
+  }
 }
