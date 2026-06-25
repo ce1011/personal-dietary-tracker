@@ -1,15 +1,13 @@
 import { useLiveQuery } from "dexie-react-hooks"
 import { db } from "@/db/db"
-import { dateKey } from "@/lib/date"
+import { addDays, dateKey, startOfDay } from "@/lib/date"
 import type { DietLog } from "@/types"
 
 export function useLogsByDate(date: Date) {
   return (
     useLiveQuery(async () => {
-      const key = dateKey(date)
-      const start = new Date(key)
-      const end = new Date(start)
-      end.setDate(end.getDate() + 1)
+      const start = startOfDay(date)
+      const end = addDays(start, 1)
       const logs = await db.diet_logs
         .where("timestamp")
         .between(start, end, true, false)
