@@ -3,6 +3,7 @@ import { DownloadIcon, UploadIcon, TriangleAlertIcon } from "lucide-react"
 import { toast } from "sonner"
 import { useDailyCalorieGoal, DEFAULT_DAILY_GOAL } from "@/hooks/use-settings"
 import { exportBackup, importBackup } from "@/lib/backup"
+import { ProfileForm } from "@/components/profile-form"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Field, FieldDescription, FieldGroup, FieldLabel } from "@/components/ui/field"
@@ -80,6 +81,8 @@ export function SettingsView() {
         </p>
       </header>
 
+      <ProfileForm />
+
       <Card className="overflow-hidden rounded-2xl border-border bg-card shadow-sm">
         <CardHeader>
           <CardTitle>每日卡路里目標</CardTitle>
@@ -107,7 +110,7 @@ export function SettingsView() {
                 </Button>
               </div>
               <FieldDescription className="text-xs">
-                預設為 {DEFAULT_DAILY_GOAL} kcal。
+                預設為 {DEFAULT_DAILY_GOAL} kcal。紀錄體重時勾選自動更新，會依公式覆寫此數值。
               </FieldDescription>
             </Field>
           </FieldGroup>
@@ -159,7 +162,7 @@ export function SettingsView() {
           <AlertDialogHeader>
             <AlertDialogTitle>確認匯入並覆蓋資料？</AlertDialogTitle>
             <AlertDialogDescription>
-              匯入後將清除並取代目前所有的飲食紀錄、預設餐點與設定。
+              匯入後將清除並取代目前所有的飲食紀錄、預設餐點、體重紀錄與設定。
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="gap-2">

@@ -7,6 +7,8 @@ export interface DietLog {
   location: string
   food_name: string
   calories: number
+  quantity?: number
+  serving_unit?: string
 }
 
 export interface PresetMeal {
@@ -15,11 +17,30 @@ export interface PresetMeal {
   default_meal_type?: MealType
   default_location?: string
   calories: number
+  serving_unit?: string
 }
 
 export interface Setting {
   key: string
   value: unknown
+}
+
+export interface WeightLog {
+  id: number
+  timestamp: Date
+  weight: number
+}
+
+export type Sex = "male" | "female"
+
+export type ActivityLevel = "sedentary" | "light" | "moderate" | "active"
+
+export interface Profile {
+  height: number
+  age: number
+  sex: Sex
+  activity: ActivityLevel
+  deficit: number
 }
 
 export interface BackupData {
@@ -28,5 +49,6 @@ export interface BackupData {
   exportedAt: string
   diet_logs: DietLog[]
   preset_meals: PresetMeal[]
+  weight_logs: WeightLog[]
   settings: Setting[]
 }

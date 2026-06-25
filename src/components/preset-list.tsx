@@ -116,6 +116,7 @@ function PresetCard({
           <div className="flex flex-wrap items-center gap-1.5">
             <Badge variant="secondary" className="tabular-nums">
               {preset.calories} kcal
+              {preset.serving_unit ? ` / ${preset.serving_unit}` : ""}
             </Badge>
             {preset.default_meal_type && (
               <Badge variant="outline">{preset.default_meal_type}</Badge>

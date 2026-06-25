@@ -1,12 +1,13 @@
 import { db } from "@/db/db"
-import type { BackupData, DietLog, PresetMeal, Setting } from "@/types"
+import type { BackupData, DietLog, PresetMeal, Setting, WeightLog } from "@/types"
 
-const BACKUP_VERSION = 1
+const BACKUP_VERSION = 2
 
 export async function buildBackup(): Promise<BackupData> {
-  const [diet_logs, preset_meals, settings] = await Promise.all([
+  const [diet_logs, preset_meals, weight_logs, settings] = await Promise.all([
     db.diet_logs.toArray(),
     db.preset_meals.toArray(),
+    db.weight_logs.toArray(),
     db.settings.toArray(),
   ])
   return {
@@ -15,6 +16,7 @@ export async function buildBackup(): Promise<BackupData> {
     exportedAt: new Date().toISOString(),
     diet_logs,
     preset_meals,
+    weight_logs,
     settings,
   }
 }
@@ -42,7 +44,7 @@ function isObject(value: unknown): value is Record<string, unknown> {
 
 function validateLog(raw: unknown): DietLog | ValidationIssue {
   if (!isObject(raw)) return { field: "diet_logs", message: "紀錄格式錯誤" }
-  const { id, timestamp, meal_type, location, food_name, calories } = raw
+  const { id, timestamp, meal_type, location, food_name, calories, quantity, serving_unit } = raw
   if (typeof id !== "number") return { field: "diet_logs", message: "id 必須為數字" }
   if (!(timestamp instanceof Date) && typeof timestamp !== "string")
     return { field: "diet_logs", message: "timestamp 格式錯誤" }
@@ -59,12 +61,14 @@ function validateLog(raw: unknown): DietLog | ValidationIssue {
     location: typeof location === "string" ? location : "",
     food_name,
     calories,
+    quantity: typeof quantity === "number" ? quantity : undefined,
+    serving_unit: typeof serving_unit === "string" ? serving_unit : undefined,
   }
 }
 
 function validatePreset(raw: unknown): PresetMeal | ValidationIssue {
   if (!isObject(raw)) return { field: "preset_meals", message: "預設餐點格式錯誤" }
-  const { id, meal_name, default_meal_type, default_location, calories } = raw
+  const { id, meal_name, default_meal_type, default_location, calories, serving_unit } = raw
   if (typeof id !== "string") return { field: "preset_meals", message: "id 必須為字串" }
   if (typeof meal_name !== "string")
     return { field: "preset_meals", message: "meal_name 格式錯誤" }
@@ -80,6 +84,22 @@ function validatePreset(raw: unknown): PresetMeal | ValidationIssue {
         : undefined,
     default_location:
       typeof default_location === "string" ? default_location : undefined,
+    serving_unit: typeof serving_unit === "string" ? serving_unit : undefined,
+  }
+}
+
+function validateWeight(raw: unknown): WeightLog | ValidationIssue {
+  if (!isObject(raw)) return { field: "weight_logs", message: "體重紀錄格式錯誤" }
+  const { id, timestamp, weight } = raw
+  if (typeof id !== "number") return { field: "weight_logs", message: "id 必須為數字" }
+  if (!(timestamp instanceof Date) && typeof timestamp !== "string")
+    return { field: "weight_logs", message: "timestamp 格式錯誤" }
+  if (typeof weight !== "number")
+    return { field: "weight_logs", message: "weight 必須為數字" }
+  return {
+    id,
+    timestamp: timestamp instanceof Date ? timestamp : new Date(timestamp),
+    weight,
   }
 }
 
@@ -100,11 +120,12 @@ export async function importBackup(file: File): Promise<void> {
   }
 
   if (!isObject(parsed)) throw new Error("備份檔格式錯誤")
-  const { diet_logs, preset_meals, settings } = parsed
+  const { diet_logs, preset_meals, weight_logs, settings } = parsed
 
   if (!Array.isArray(diet_logs)) throw new Error("備份檔缺少 diet_logs")
   if (!Array.isArray(preset_meals)) throw new Error("備份檔缺少 preset_meals")
   if (!Array.isArray(settings)) throw new Error("備份檔缺少 settings")
+  const weightLogsRaw = Array.isArray(weight_logs) ? weight_logs : []
 
   const logs = diet_logs.map(validateLog)
   const badLog = logs.find((l): l is ValidationIssue => "field" in l)
@@ -114,19 +135,25 @@ export async function importBackup(file: File): Promise<void> {
   const badPreset = presets.find((p): p is ValidationIssue => "field" in p)
   if (badPreset) throw new Error((badPreset as ValidationIssue).message)
 
+  const weights = weightLogsRaw.map(validateWeight)
+  const badWeight = weights.find((w): w is ValidationIssue => "field" in w)
+  if (badWeight) throw new Error((badWeight as ValidationIssue).message)
+
   const settingRows = settings.map(validateSetting)
   const badSetting = settingRows.find((s): s is ValidationIssue => "field" in s)
   if (badSetting) throw new Error((badSetting as ValidationIssue).message)
 
-  await db.transaction("rw", db.diet_logs, db.preset_meals, db.settings, async () => {
+  await db.transaction("rw", db.diet_logs, db.preset_meals, db.weight_logs, db.settings, async () => {
     await Promise.all([
       db.diet_logs.clear(),
       db.preset_meals.clear(),
+      db.weight_logs.clear(),
       db.settings.clear(),
     ])
     await Promise.all([
       db.diet_logs.bulkPut(logs as DietLog[]),
       db.preset_meals.bulkPut(presets as PresetMeal[]),
+      db.weight_logs.bulkPut(weights as WeightLog[]),
       db.settings.bulkPut(settingRows as Setting[]),
     ])
   })

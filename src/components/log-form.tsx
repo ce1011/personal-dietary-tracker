@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react"
+import { MinusIcon, PlusIcon } from "lucide-react"
 import { toast } from "sonner"
 import {
   Drawer,
@@ -26,6 +27,7 @@ interface LogFormValues {
   location: string
   food_name: string
   calories: string
+  quantity: string
 }
 
 interface LogFormProps {
@@ -49,43 +51,92 @@ export function LogForm({
     location: "",
     food_name: "",
     calories: "",
+    quantity: "1",
   })
+  const [servingUnit, setServingUnit] = useState<string | undefined>(undefined)
+  const [perUnitCalories, setPerUnitCalories] = useState(0)
   const [errors, setErrors] = useState<{
     food_name?: string
     calories?: string
+    quantity?: string
   }>({})
 
   useEffect(() => {
     if (!open) return
     const baseDate = defaultDate ?? new Date()
+
+    let unit: string | undefined
+    let perUnit = 0
+    let qty = "1"
+
+    if (preset?.serving_unit) {
+      unit = preset.serving_unit
+      perUnit = preset.calories
+      qty = "1"
+    } else if (editLog?.serving_unit && editLog.quantity && editLog.quantity > 0) {
+      unit = editLog.serving_unit
+      perUnit = editLog.calories / editLog.quantity
+      qty = String(editLog.quantity)
+    }
+
+    setServingUnit(unit)
+    setPerUnitCalories(perUnit)
+
+    const portion = !!unit && perUnit > 0
+    const calories = portion
+      ? String(Math.round(Number(qty) * perUnit))
+      : editLog?.calories != null
+        ? String(editLog.calories)
+        : preset?.calories != null
+          ? String(preset.calories)
+          : ""
+
     setValues({
       timestamp: editLog?.timestamp ?? baseDate,
       meal_type:
         editLog?.meal_type ?? preset?.default_meal_type ?? detectMealType(baseDate),
       location: editLog?.location ?? preset?.default_location ?? "",
       food_name: editLog?.food_name ?? preset?.meal_name ?? "",
-      calories:
-        editLog?.calories != null
-          ? String(editLog.calories)
-          : preset?.calories != null
-            ? String(preset.calories)
-            : "",
+      calories,
+      quantity: qty,
     })
     setErrors({})
   }, [open, editLog, preset, defaultDate])
 
   const isEdit = editLog != null
+  const portionMode = !!servingUnit && perUnitCalories > 0
 
   function update<K extends keyof LogFormValues>(key: K, value: LogFormValues[K]) {
     setValues((prev) => ({ ...prev, [key]: value }))
   }
 
+  function applyQuantity(raw: string) {
+    const n = Number(raw)
+    setValues((prev) => ({
+      ...prev,
+      quantity: raw,
+      calories:
+        Number.isNaN(n) || n <= 0 ? "" : String(Math.round(n * perUnitCalories)),
+    }))
+  }
+
+  function stepQuantity(delta: number) {
+    const current = Number(values.quantity) || 0
+    applyQuantity(String(Math.max(1, current + delta)))
+  }
+
   function validate(): boolean {
     const next: typeof errors = {}
     if (!values.food_name.trim()) next.food_name = "請輸入食物名稱"
-    const cal = Number(values.calories)
-    if (!values.calories.trim() || Number.isNaN(cal) || cal <= 0)
-      next.calories = "請輸入大於 0 的卡路里"
+    if (portionMode) {
+      const q = Number(values.quantity)
+      if (!values.quantity.trim() || Number.isNaN(q) || q <= 0)
+        next.quantity = "份量需大於 0"
+    } else {
+      const cal = Number(values.calories)
+      if (!values.calories.trim() || Number.isNaN(cal) || cal <= 0)
+        next.calories = "請輸入大於 0 的卡路里"
+    }
     setErrors(next)
     return Object.keys(next).length === 0
   }
@@ -98,6 +149,9 @@ export function LogForm({
       location: values.location.trim(),
       food_name: values.food_name.trim(),
       calories: Number(values.calories),
+      ...(portionMode
+        ? { quantity: Number(values.quantity), serving_unit: servingUnit }
+        : {}),
     }
     try {
       if (isEdit && editLog) {
@@ -190,20 +244,79 @@ export function LogForm({
               {errors.food_name && <FieldError>{errors.food_name}</FieldError>}
             </Field>
 
-            <Field data-invalid={!!errors.calories}>
-              <FieldLabel htmlFor="log-calories">卡路里</FieldLabel>
-              <Input
-                id="log-calories"
-                type="number"
-                inputMode="numeric"
-                placeholder="如：450"
-                className="h-12 rounded-2xl"
-                value={values.calories}
-                aria-invalid={!!errors.calories}
-                onChange={(e) => update("calories", e.target.value)}
-              />
-              {errors.calories && <FieldError>{errors.calories}</FieldError>}
-            </Field>
+            {portionMode ? (
+              <>
+                <Field data-invalid={!!errors.quantity}>
+                  <FieldLabel htmlFor="log-quantity">份量</FieldLabel>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-12 w-12 shrink-0 rounded-2xl"
+                      aria-label="減少份量"
+                      onClick={() => stepQuantity(-1)}
+                    >
+                      <MinusIcon />
+                    </Button>
+                    <div className="flex h-12 flex-1 items-center justify-center gap-1 rounded-2xl border border-input bg-transparent">
+                      <input
+                        id="log-quantity"
+                        type="number"
+                        inputMode="decimal"
+                        step="1"
+                        className="w-16 bg-transparent text-center text-lg font-semibold tabular-nums outline-none [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        value={values.quantity}
+                        aria-invalid={!!errors.quantity}
+                        onChange={(e) => applyQuantity(e.target.value)}
+                      />
+                      <span className="text-sm text-muted-foreground">
+                        {servingUnit}
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-12 w-12 shrink-0 rounded-2xl"
+                      aria-label="增加份量"
+                      onClick={() => stepQuantity(1)}
+                    >
+                      <PlusIcon />
+                    </Button>
+                  </div>
+                  {errors.quantity && <FieldError>{errors.quantity}</FieldError>}
+                  <FieldDescription className="text-xs">
+                    每 1 {servingUnit} {Math.round(perUnitCalories)} kcal
+                  </FieldDescription>
+                </Field>
+
+                <Field>
+                  <FieldLabel>計算熱量</FieldLabel>
+                  <div className="flex h-12 items-center justify-between rounded-2xl border border-input bg-muted/40 px-4">
+                    <span className="text-sm text-muted-foreground">
+                      {values.quantity || 0} {servingUnit}
+                    </span>
+                    <span className="font-heading text-lg font-semibold tabular-nums text-foreground">
+                      {values.calories || 0} kcal
+                    </span>
+                  </div>
+                </Field>
+              </>
+            ) : (
+              <Field data-invalid={!!errors.calories}>
+                <FieldLabel htmlFor="log-calories">卡路里</FieldLabel>
+                <Input
+                  id="log-calories"
+                  type="number"
+                  inputMode="numeric"
+                  placeholder="如：450"
+                  className="h-12 rounded-2xl"
+                  value={values.calories}
+                  aria-invalid={!!errors.calories}
+                  onChange={(e) => update("calories", e.target.value)}
+                />
+                {errors.calories && <FieldError>{errors.calories}</FieldError>}
+              </Field>
+            )}
           </FieldGroup>
         </div>
 

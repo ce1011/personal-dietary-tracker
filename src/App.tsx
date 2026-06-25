@@ -2,6 +2,7 @@ import { useState } from "react"
 import { AppLayout } from "@/components/app-layout"
 import { BottomNav, type Tab } from "@/components/bottom-nav"
 import { LogFormProvider } from "@/components/log-form-context"
+import { WeightFormProvider } from "@/components/weight-form-context"
 import { Toaster } from "@/components/ui/sonner"
 import { TodayView } from "@/views/today-view"
 import { HistoryView } from "@/views/history-view"
@@ -20,17 +21,19 @@ export default function App() {
   return (
     <AppLayout>
       <LogFormProvider>
-        <main className="flex flex-1 flex-col overflow-y-auto">
-          {tab === "today" &&
-            (historyOpen ? (
-              <HistoryView onBack={() => setHistoryOpen(false)} />
-            ) : (
-              <TodayView onOpenHistory={() => setHistoryOpen(true)} />
-            ))}
-          {tab === "presets" && <PresetsView />}
-          {tab === "settings" && <SettingsView />}
-        </main>
-        <BottomNav active={tab} onChange={handleChangeTab} />
+        <WeightFormProvider>
+          <main className="flex flex-1 flex-col overflow-y-auto">
+            {tab === "today" &&
+              (historyOpen ? (
+                <HistoryView onBack={() => setHistoryOpen(false)} />
+              ) : (
+                <TodayView onOpenHistory={() => setHistoryOpen(true)} />
+              ))}
+            {tab === "presets" && <PresetsView />}
+            {tab === "settings" && <SettingsView />}
+          </main>
+          <BottomNav active={tab} onChange={handleChangeTab} />
+        </WeightFormProvider>
       </LogFormProvider>
       <Toaster position="top-center" />
     </AppLayout>

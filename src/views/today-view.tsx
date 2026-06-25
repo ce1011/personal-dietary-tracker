@@ -4,6 +4,7 @@ import { useTodayLogs } from "@/hooks/use-diet-logs"
 import { useDailyCalorieGoal } from "@/hooks/use-settings"
 import { useLogForm } from "@/components/log-form-context"
 import { BentoDashboard } from "@/components/bento-dashboard"
+import { WeightCard } from "@/components/weight-card"
 import { LogList } from "@/components/log-list"
 import { Button } from "@/components/ui/button"
 import { formatLongDate } from "@/lib/date"
@@ -45,6 +46,8 @@ export function TodayView({ onOpenHistory }: { onOpenHistory: () => void }) {
           <CalendarDaysIcon />
         </Button>
       </header>
+
+      <WeightCard />
 
       <BentoDashboard
         logs={logs}

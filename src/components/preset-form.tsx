@@ -8,7 +8,13 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog"
-import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field"
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/ui/field"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import {
@@ -27,6 +33,7 @@ const NONE = "none"
 interface PresetFormValues {
   meal_name: string
   calories: string
+  serving_unit: string
   default_meal_type: string
   default_location: string
 }
@@ -41,6 +48,7 @@ export function PresetForm({ open, onOpenChange, editPreset }: PresetFormProps) 
   const [values, setValues] = useState<PresetFormValues>({
     meal_name: "",
     calories: "",
+    serving_unit: "",
     default_meal_type: NONE,
     default_location: "",
   })
@@ -54,6 +62,7 @@ export function PresetForm({ open, onOpenChange, editPreset }: PresetFormProps) 
     setValues({
       meal_name: editPreset?.meal_name ?? "",
       calories: editPreset?.calories != null ? String(editPreset.calories) : "",
+      serving_unit: editPreset?.serving_unit ?? "",
       default_meal_type: editPreset?.default_meal_type ?? NONE,
       default_location: editPreset?.default_location ?? "",
     })
@@ -61,6 +70,7 @@ export function PresetForm({ open, onOpenChange, editPreset }: PresetFormProps) 
   }, [open, editPreset])
 
   const isEdit = editPreset != null
+  const hasUnit = values.serving_unit.trim().length > 0
 
   function update<K extends keyof PresetFormValues>(
     key: K,
@@ -84,6 +94,7 @@ export function PresetForm({ open, onOpenChange, editPreset }: PresetFormProps) 
     const payload = {
       meal_name: values.meal_name.trim(),
       calories: Number(values.calories),
+      serving_unit: values.serving_unit.trim() || undefined,
       default_meal_type:
         values.default_meal_type === NONE
           ? undefined
@@ -131,18 +142,39 @@ export function PresetForm({ open, onOpenChange, editPreset }: PresetFormProps) 
               {errors.meal_name && <FieldError>{errors.meal_name}</FieldError>}
             </Field>
 
+            <Field>
+              <FieldLabel htmlFor="preset-unit">份量單位（選填）</FieldLabel>
+              <Input
+                id="preset-unit"
+                placeholder="如：個、片、碗、杯"
+                className="h-12 rounded-2xl"
+                value={values.serving_unit}
+                onChange={(e) => update("serving_unit", e.target.value)}
+              />
+              <FieldDescription>
+                填入後，紀錄時可選擇份量自動計算熱量。
+              </FieldDescription>
+            </Field>
+
             <Field data-invalid={!!errors.calories}>
-              <FieldLabel htmlFor="preset-calories">卡路里</FieldLabel>
+              <FieldLabel htmlFor="preset-calories">
+                {hasUnit ? "每份卡路里" : "卡路里"}
+              </FieldLabel>
               <Input
                 id="preset-calories"
                 type="number"
                 inputMode="numeric"
-                placeholder="如：140"
+                placeholder="如：200"
                 className="h-12 rounded-2xl"
                 value={values.calories}
                 aria-invalid={!!errors.calories}
                 onChange={(e) => update("calories", e.target.value)}
               />
+              {hasUnit && values.serving_unit.trim() && (
+                <FieldDescription>
+                  每 1 {values.serving_unit.trim()} 的熱量。
+                </FieldDescription>
+              )}
               {errors.calories && <FieldError>{errors.calories}</FieldError>}
             </Field>
 

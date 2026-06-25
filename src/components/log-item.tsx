@@ -45,6 +45,11 @@ export function LogItem({
       <div className="flex min-w-0 flex-1 flex-col">
         <span className="truncate font-medium text-foreground">
           {log.food_name}
+          {log.quantity && log.serving_unit ? (
+            <span className="ml-1.5 text-sm font-normal text-muted-foreground">
+              ×{log.quantity} {log.serving_unit}
+            </span>
+          ) : null}
         </span>
         {log.location && (
           <span className="flex items-center gap-1 text-xs text-muted-foreground">
