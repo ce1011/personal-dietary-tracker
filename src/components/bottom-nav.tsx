@@ -1,10 +1,11 @@
-import { UtensilsIcon, StarIcon, SettingsIcon } from "lucide-react"
+import { TrendingUpIcon, UtensilsIcon, StarIcon, SettingsIcon } from "lucide-react"
 import { cn } from "@/lib/utils"
 
-export type Tab = "today" | "presets" | "settings"
+export type Tab = "today" | "insights" | "presets" | "settings"
 
 const TABS: Array<{ id: Tab; label: string; icon: typeof UtensilsIcon }> = [
   { id: "today", label: "今日", icon: UtensilsIcon },
+  { id: "insights", label: "統計", icon: TrendingUpIcon },
   { id: "presets", label: "預設", icon: StarIcon },
   { id: "settings", label: "設定", icon: SettingsIcon },
 ]

@@ -6,6 +6,7 @@ import { WeightFormProvider } from "@/components/weight-form-context"
 import { Toaster } from "@/components/ui/sonner"
 import { TodayView } from "@/views/today-view"
 import { HistoryView } from "@/views/history-view"
+import { InsightsView } from "@/views/insights-view"
 import { PresetsView } from "@/views/presets-view"
 import { SettingsView } from "@/views/settings-view"
 
@@ -29,6 +30,7 @@ export default function App() {
               ) : (
                 <TodayView onOpenHistory={() => setHistoryOpen(true)} />
               ))}
+            {tab === "insights" && <InsightsView />}
             {tab === "presets" && <PresetsView />}
             {tab === "settings" && <SettingsView />}
           </main>
