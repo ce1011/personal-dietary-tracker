@@ -41,6 +41,7 @@ export interface Profile {
   sex: Sex
   activity: ActivityLevel
   deficit: number
+  targetWeight?: number
 }
 
 export interface BackupData {

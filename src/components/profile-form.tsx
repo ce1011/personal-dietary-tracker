@@ -35,6 +35,7 @@ interface ProfileFormValues {
   sex: string
   activity: string
   deficit: string
+  targetWeight: string
 }
 
 export function ProfileForm() {
@@ -46,6 +47,7 @@ export function ProfileForm() {
     sex: EMPTY,
     activity: EMPTY,
     deficit: EMPTY,
+    targetWeight: "",
   })
   const [errors, setErrors] = useState<{
     height?: string
@@ -62,6 +64,7 @@ export function ProfileForm() {
       sex: profile?.sex ?? EMPTY,
       activity: profile?.activity ?? EMPTY,
       deficit: profile?.deficit ? String(profile.deficit) : EMPTY,
+      targetWeight: profile?.targetWeight ? String(profile.targetWeight) : "",
     })
     setErrors({})
   }, [profile])
@@ -228,6 +231,24 @@ export function ProfileForm() {
             {errors.deficit && <FieldError>{errors.deficit}</FieldError>}
           </Field>
 
+          <Field>
+            <FieldLabel htmlFor="profile-target-weight">
+              目標體重 (kg)（選填）
+            </FieldLabel>
+            <Input
+              id="profile-target-weight"
+              type="number"
+              inputMode="numeric"
+              placeholder="如：65"
+              className="h-12 rounded-2xl"
+              value={values.targetWeight}
+              onChange={(e) => update("targetWeight", e.target.value)}
+            />
+            <FieldDescription className="text-xs">
+              設定後，統計頁的體重趨勢圖會顯示目標線。
+            </FieldDescription>
+          </Field>
+
           {preview && (
             <div className="flex flex-col gap-1.5 rounded-2xl bg-muted/60 p-4 text-sm">
               <div className="flex items-center justify-between">
@@ -273,11 +294,16 @@ function buildProfile(values: ProfileFormValues): Profile | null {
   ) {
     return null
   }
+  const targetWeight =
+    values.targetWeight.trim() === "" || Number.isNaN(Number(values.targetWeight))
+      ? undefined
+      : Number(values.targetWeight)
   return {
     height,
     age,
     sex: values.sex as Sex,
     activity: values.activity as ActivityLevel,
     deficit,
+    ...(targetWeight !== undefined ? { targetWeight } : {}),
   }
 }
