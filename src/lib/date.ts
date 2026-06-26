@@ -61,3 +61,10 @@ export function toLocalDateTimeInputValue(date: Date): string {
 export function fromLocalDateTimeInputValue(value: string): Date {
   return new Date(value)
 }
+
+export function formatMonthDay(date: Date): string {
+  return new Intl.DateTimeFormat("zh-Hant", {
+    month: "numeric",
+    day: "numeric",
+  }).format(date)
+}
